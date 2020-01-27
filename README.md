@@ -8,7 +8,10 @@
 
 ### Day 1: Get `print8.ls8` running
 
-- [ ] Inventory what is here
+- [✅] Inventory what is here
+   - README.md: a markdown? file which explains a directory
+   - cpu.py: a script which emulates cpu functionality
+   - ls8.py: loads and runs the cpu.. not sure why it's needed yet. Presumably it will also have input and output device emulators.
 - [ ] Implement the `CPU` constructor
 - [ ] Add RAM functions `ram_read()` and `ram_write()`
 - [ ] Implement the core of `run()`
