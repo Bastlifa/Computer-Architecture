@@ -6,6 +6,8 @@ LDI = 130
 PRN = 71
 HLT = 1
 MUL = 162
+PUSH = 0b01000101
+POP = 0b01000110
 
 class CPU:
     """Main CPU class."""
@@ -15,6 +17,7 @@ class CPU:
         self.ram = [0b00000000]*256
         self.reg = [0b00000000]*8
         self.pc = 0
+        self.sp = 7
         self.running = True
         self.branchtable = {}
         self.branchtable[PRN] = self.handle_prn
@@ -23,6 +26,8 @@ class CPU:
         self.branchtable[MUL] = self.handle_mul
         self.branchtable[LDI] = self.handle_ldi
         self.branchtable[HLT] = self.handle_hlt
+        self.branchtable[PUSH] = self.handle_push
+        self.branchtable[POP] = self.handle_pop
 
     def load(self):
         """Load a program into memory."""
@@ -86,40 +91,54 @@ class CPU:
 
         print()
 
-    def handle_ldi(self, operand_a, operand_b):
+    def handle_ldi(self):
+        operand_a = self.ram_read(self.pc + 1)
+        operand_b = self.ram_read(self.pc + 2)
         self.reg[operand_a] = operand_b
         self.pc += 3
 
-    def handle_prn(self, operand_a, operand_b):
+    def handle_prn(self):
+        operand_a = self.ram_read(self.pc + 1)
         print(self.reg[operand_a])
         self.pc += 2
 
     def handle_hlt(self):
         self.running = False
-        # self.pc += 1
 
-    def handle_add(self, operand_a, operand_b):
+    def handle_add(self):
+        operand_a = self.ram_read(self.pc + 1)
+        operand_b = self.ram_read(self.pc + 2)
         self.alu("ADD", operand_a, operand_b)
         self.pc += 3
 
-    def handle_sub(self, operand_a, operand_b):
+    def handle_sub(self):
+        operand_a = self.ram_read(self.pc + 1)
+        operand_b = self.ram_read(self.pc + 2)
         self.alu("SUB", operand_a, operand_b)
         self.pc += 3
         
-    def handle_mul(self, operand_a, operand_b):
+    def handle_mul(self):
+        operand_a = self.ram_read(self.pc + 1)
+        operand_b = self.ram_read(self.pc + 2)
         self.alu("MUL", operand_a, operand_b)
         self.pc += 3
+
+    def handle_push(self):
+        operand_a = self.ram_read(self.pc + 1)
+        val = self.reg[operand_a]
+        self.reg[self.sp] -= 1
+        self.ram_write(val, self.reg[self.sp])
+        self.pc += 2
+
+    def handle_pop(self):
+        operand_a = self.ram_read(self.pc + 1)
+        self.reg[operand_a] = self.ram_read(self.reg[self.sp])
+        self.reg[self.sp] += 1
+        self.pc += 2
 
     def run(self):
         """Run the CPU."""
         self.running = True
-
         while self.running:
             IR = self.ram_read(self.pc)
-            print('IR', IR)
-            if IR != 1:
-                operand_a = self.ram_read(self.pc + 1)
-                operand_b = self.ram_read(self.pc + 2)
-                self.branchtable[IR](operand_a, operand_b)
-            else: self.branchtable[IR]()
-
+            self.branchtable[IR]()

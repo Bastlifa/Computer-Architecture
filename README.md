@@ -11,7 +11,7 @@
 - ✅ Inventory what is here
    - README.md: a markdown? file which explains a directory
    - cpu.py: a script which emulates cpu functionality
-   - ls8.py: loads and runs the cpu.. not sure why it's needed yet. Presumably it will also have input and output device emulators.
+   - ls8.py: loads and runs the cpu.
 - ✅ Implement the `CPU` constructor
 - ✅ Add RAM functions `ram_read()` and `ram_write()`
 - ✅ Implement the core of `run()`
@@ -28,7 +28,7 @@
 
 ### Day 3: Stack
 
-- [ ] Implement the System Stack and be able to run the `stack.ls8` program
+- ✅ Implement the System Stack and be able to run the `stack.ls8` program
 
 ### Day 4: Get `call.ls8` running
 
