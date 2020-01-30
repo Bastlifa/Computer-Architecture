@@ -2,12 +2,17 @@
 
 import sys
 
-LDI = 130
-PRN = 71
+ADD = 0b10100000
+CALL = 80
+DEC = 0b01100110
 HLT = 1
+LDI = 130
 MUL = 162
-PUSH = 0b01000101
 POP = 0b01000110
+PRN = 71
+PUSH = 0b01000101
+RET = 17
+ST = 132
 
 class CPU:
     """Main CPU class."""
@@ -21,13 +26,16 @@ class CPU:
         self.running = True
         self.branchtable = {}
         self.branchtable[PRN] = self.handle_prn
-        # self.branchtable[ADD] = self.handle_add
-        # self.branchtable[SUB] = self.handle_sub
+        self.branchtable[ADD] = self.handle_add
+        self.branchtable[DEC] = self.handle_dec
         self.branchtable[MUL] = self.handle_mul
         self.branchtable[LDI] = self.handle_ldi
         self.branchtable[HLT] = self.handle_hlt
         self.branchtable[PUSH] = self.handle_push
         self.branchtable[POP] = self.handle_pop
+        self.branchtable[CALL] = self.handle_call
+        self.branchtable[RET] = self.handle_ret
+        self.branchtable[ST] = self.handle_st
 
     def load(self):
         """Load a program into memory."""
@@ -57,7 +65,7 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        elif op == "SUB": 
+        elif op == "DEC": 
             self.reg[reg_a] -= self.reg[reg_b]
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
@@ -111,10 +119,10 @@ class CPU:
         self.alu("ADD", operand_a, operand_b)
         self.pc += 3
 
-    def handle_sub(self):
+    def handle_dec(self):
         operand_a = self.ram_read(self.pc + 1)
         operand_b = self.ram_read(self.pc + 2)
-        self.alu("SUB", operand_a, operand_b)
+        self.alu("DEC", operand_a, operand_b)
         self.pc += 3
         
     def handle_mul(self):
@@ -136,9 +144,42 @@ class CPU:
         self.reg[self.sp] += 1
         self.pc += 2
 
+    def handle_call(self):
+        ret_loc = self.pc + 2
+        self.reg[self.sp] -= 1
+        self.ram_write(ret_loc, self.reg[self.sp])
+        
+        reg = self.ram_read(self.pc + 1)
+
+        sub_rtn_addr = self.reg[reg]
+
+        self.pc = sub_rtn_addr
+
+    def handle_ret(self):
+        ret_addr = self.reg[self.sp]
+        self.pc = self.ram_read(ret_addr)
+        self.reg[self.sp] += 1
+
+    def handle_st(self):
+        pass
+
     def run(self):
         """Run the CPU."""
         self.running = True
         while self.running:
             IR = self.ram_read(self.pc)
             self.branchtable[IR]()
+
+
+# R0: 10
+# R1: 24
+# R7: 250
+# pc: 6
+
+"""
+stack:
+ret_loc = 8
+stuff
+stuff1
+stuff2
+"""
